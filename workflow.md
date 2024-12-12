@@ -5,11 +5,11 @@
 
 ## How to install the current local version
 
-1. Install [anaconda](https://www.anaconda.com) package manager with [python](https://www.python.org) (version 3.8);
+1. Install [anaconda](https://www.anaconda.com) package manager with [python](https://www.python.org) (version >= 3.10);
 
 2. Create a virtual environment:
     ```bash
-    conda create --name teneva_bm python=3.8 -y
+    conda create --name teneva_bm python=3.10 -y
     ```
 
 3. Activate the environment:
@@ -34,7 +34,7 @@
 
 7. Install dependency to run benchmark optimization examples:
     ```bash
-    pip install protes==0.3.6
+    pip install protes==0.3.10
     ```
 
 8. Reinstall `teneva_bm` from the source (after updates of the code):

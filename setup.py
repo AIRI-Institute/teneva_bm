@@ -54,6 +54,8 @@ setup_args = dict(
         'Programming Language :: Python :: 3 :: Only',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
     ],
     keywords='benchmarks approximation optimization multidimensional array multivariate function low-rank representation tensor train format TT-decomposition',
     packages=find_packages('teneva_bm', './teneva_bm/'),

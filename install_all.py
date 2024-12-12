@@ -11,11 +11,11 @@ clusters of our group. If you run this script on zhores, then you should set
 the flag "--zhores" (note that rendering does not work in this case now).
 
 For convenience, the script can be downloaded with the following command:
-$ wget https://raw.githubusercontent.com/AndreiChertkov/teneva_bm/main/install_all.py (TODO: update to AIRI)
+$ wget https://raw.githubusercontent.com/AIRI-Institute/teneva_bm/main/install_all.py
 
 An existing environment can be specified as an argument to the script, or a new
 one can be pre-created:
-$ conda create --name teneva_bm python=3.8 -y
+$ conda create --name teneva_bm python=3.10 -y
 
 * If the environment already exists, you can (optionally) delete it before:
 $ conda activate && conda remove --name teneva_bm --all -y
@@ -51,29 +51,19 @@ WITH_INFO = True
 WITH_LOG = False
 PLATFORMS = ['linux', 'osx', 'colab', 'zhores']
 PY_PACKAGES = [
-    'mujoco==2.3.6',
-    'imageio==2.31.1',
-    'gym==0.26.2',
-    'opencv-python==4.7.0.72',
-    'pygame==2.1.0',
-    'swig==4.1.1',
-    'box2d-py==2.3.5',
-    'networkx==3.0',
-    'qubogen==0.1.1',
-    'gekko==1.0.6']
-PY_PACKAGES_COLAB = [
     'PyOpenGL_accelerate',
     'free-mujoco-py==2.1.6',
     'gym==0.26.2',
     'mujoco==2.3.7',
     'imageio==2.31.1',
-    'opencv-python==4.7.0.72',
+    'opencv-python==4.10.0.84',
     'pygame==2.1.0',
     'swig==4.1.1',
     'box2d-py==2.3.5',
     'networkx==3.0',
     'qubogen==0.1.1',
     'gekko==1.0.6']
+PY_PACKAGES_COLAB = PY_PACKAGES
 
 
 def install_all(env=None, with_info=True, with_log=False, is_zhores=False):
@@ -318,7 +308,7 @@ def _check_env(env):
 
     if not res:
         msg = f'Environment "{env}" does not exist. '
-        msg += f'Run "conda create --name {env} python=3.8 -y" before'
+        msg += f'Run "conda create --name {env} python=3.10 -y" before'
         _log(msg, 'WRN')
         return False
 
@@ -384,7 +374,7 @@ def _run_opengl_edit(env=None, fold=None):
                 _log('Can not find anaconda path', 'WRN')
                 return False
         fold = out.split('/envs/')[0]
-        fold += f'/envs/{env}/lib/python3.8/site-packages'
+        fold += f'/envs/{env}/lib/python3.10/site-packages'
 
     fpath = fold + '/OpenGL/error.py'
 
@@ -413,7 +403,7 @@ def _run_glfw_edit(env=None, fold=None):
                 _log('Can not find anaconda path', 'WRN')
                 return False
         fold = out.split('/envs/')[0]
-        fold += f'/envs/{env}/lib/python3.8/site-packages'
+        fold += f'/envs/{env}/lib/python3.10/site-packages'
 
     fpath = fold + '/mujoco/glfw/__init__.py'
 
