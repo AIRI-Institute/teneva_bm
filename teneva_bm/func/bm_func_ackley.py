@@ -2,6 +2,13 @@ import numpy as np
 from teneva_bm.func.func import Func
 
 
+try:
+    import torch
+    with_torch = True
+except Exception as e:
+    with_torch = False
+
+
 class BmFuncAckley(Func):
     def __init__(self, d=7, n=16, seed=42, name=None):
         super().__init__(d, n, seed, name)
@@ -66,19 +73,16 @@ class BmFuncAckley(Func):
 
         return y1 + y2 + y3
 
-    def _target_pt(self, x):
-        """Draft."""
-        d = torch.tensor(self.d)
-        opt_A = torch.tensor(self.opt_A)
-        opt_B = torch.tensor(self.opt_B)
-        opt_C = torch.tensor(self.opt_C)
+    def target_batch_pt(self, X):
+        if not with_torch:
+            raise ValueError('Can not import torch')
 
-        y1 = torch.sqrt(torch.sum(x**2) / d)
-        y1 = -v * torch.exp(-opt_B * y1)
+        y1 = torch.sqrt(torch.sum(X**2) / self.d)
+        y1 = -self.opt_A * torch.exp(-self.opt_B * y1)
 
-        y2 = torch.sum(torch.cos(opt_C * x))
-        y2 = -torch.exp(y2 / d)
+        y2 = torch.sum(torch.cos(self.opt_C * X), dim=1)
+        y2 = -torch.exp(y2 / self.d)
 
-        y3 = opt_A + torch.exp(torch.tensor(1.))
+        y3 = self.opt_A + np.exp(1.)
 
         return y1 + y2 + y3

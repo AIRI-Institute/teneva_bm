@@ -3,6 +3,13 @@ from teneva_bm.func.func import Func
 import teneva
 
 
+try:
+    import torch
+    with_torch = True
+except Exception as e:
+    with_torch = False
+
+
 class BmFuncTrigonometric(Func):
     def __init__(self, d=7, n=16, seed=42, name=None):
         super().__init__(d, n, seed, name)
@@ -61,3 +68,19 @@ class BmFuncTrigonometric(Func):
         Y3 = i * (1. - np.cos(X) - np.sin(X))
 
         return np.sum((y1 + Y2 + Y3)**2, axis=1)
+
+    def target_batch_pt(self, X):
+        if not with_torch:
+            raise ValueError('Can not import torch')
+
+        device = X.device
+        
+        y1 = self.d
+        
+        y2 = -torch.sum(torch.cos(X), dim=1)
+        Y2 = torch.hstack([y2.reshape(-1, 1)]*self.d)
+        
+        i = torch.arange(1, self.d+1, device=device)
+        Y3 = i * (1. - torch.cos(X) - torch.sin(X))
+        
+        return torch.sum((y1 + Y2 + Y3)**2, dim=1)

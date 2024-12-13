@@ -3,6 +3,13 @@ import teneva
 from teneva_bm.func.func import Func
 
 
+try:
+    import torch
+    with_torch = True
+except Exception as e:
+    with_torch = False
+
+
 class BmFuncGriewank(Func):
     def __init__(self, d=7, n=16, seed=42, name=None):
         super().__init__(d, n, seed, name)
@@ -40,21 +47,25 @@ class BmFuncGriewank(Func):
     def target_batch(self, X):
         y1 = np.sum(X**2, axis=1) / 4000
 
-        y2 = np.cos(X / np.sqrt(np.arange(1, self.d+1)))
+        i = np.arange(1, self.d+1)
+        y2 = np.cos(X / np.sqrt(i))
         y2 = - np.prod(y2, axis=1)
 
         y3 = 1.
 
         return y1 + y2 + y3
 
-    def _target_pt(self, x):
-        """Draft."""
-        d = torch.tensor(self.d)
+    def target_batch_pt(self, X):
+        if not with_torch:
+            raise ValueError('Can not import torch')
+        
+        device = X.device
+ 
+        y1 = torch.sum(X**2, dim=1) / 4000
 
-        y1 = torch.sum(x**2) / 4000
-
-        y2 = torch.cos(x / torch.sqrt(torch.arange(d) + 1.))
-        y2 = - torch.prod(y2)
+        i = torch.arange(1, self.d+1, device=device)
+        y2 = torch.cos(X / torch.sqrt(i))
+        y2 = - torch.prod(y2, dim=1)
 
         y3 = 1.
 

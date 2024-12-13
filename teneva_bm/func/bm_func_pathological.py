@@ -2,6 +2,13 @@ import numpy as np
 from teneva_bm.func.func import Func
 
 
+try:
+    import torch
+    with_torch = True
+except Exception as e:
+    with_torch = False
+
+
 class BmFuncPathological(Func):
     def __init__(self, d=7, n=16, seed=42, name=None):
         super().__init__(d, n, seed, name)
@@ -39,3 +46,16 @@ class BmFuncPathological(Func):
         Y2 = 1. + 0.001 * (X1**2 - 2. * X1 * X2 + X2**2)**2
 
         return np.sum(0.5 + Y1 / Y2, axis=1)
+
+
+    def target_batch_pt(self, X):
+        if not with_torch:
+            raise ValueError('Can not import torch')
+
+        X1 = X[:, :-1]
+        X2 = X[:, 1:]
+
+        Y1 = (torch.sin(torch.sqrt(100. * X1**2 + X2**2)))**2 - 0.5
+        Y2 = 1. + 0.001 * (X1**2 - 2. * X1 * X2 + X2**2)**2
+
+        return torch.sum(0.5 + Y1 / Y2, dim=1)

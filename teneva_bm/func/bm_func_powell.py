@@ -2,6 +2,13 @@ import numpy as np
 from teneva_bm.func.func import Func
 
 
+try:
+    import torch
+    with_torch = True
+except Exception as e:
+    with_torch = False
+
+
 class BmFuncPowell(Func):
     def __init__(self, d=7, n=16, seed=42, name=None):
         super().__init__(d, n, seed, name)
@@ -40,3 +47,13 @@ class BmFuncPowell(Func):
     def target_batch(self, X):
         i = np.arange(1, self.d+1)
         return np.sum(np.abs(X)**(i+1), axis=1)
+
+    def target_batch_pt(self, X):
+        if not with_torch:
+            raise ValueError('Can not import torch')
+        
+        device = X.device
+        
+        i = torch.arange(1, self.d+1)
+        
+        return torch.sum(torch.abs(X)**(i+1), dim=1)

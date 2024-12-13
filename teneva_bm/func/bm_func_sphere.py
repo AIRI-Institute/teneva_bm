@@ -2,6 +2,13 @@ import numpy as np
 from teneva_bm.func.func import Func
 
 
+try:
+    import torch
+    with_torch = True
+except Exception as e:
+    with_torch = False
+
+
 class BmFuncSphere(Func):
     def __init__(self, d=7, n=16, seed=42, name=None):
         super().__init__(d, n, seed, name)
@@ -41,3 +48,9 @@ class BmFuncSphere(Func):
 
     def target_batch(self, X):
         return np.sum(X**2, axis=1)
+
+    def target_batch_pt(self, X):
+        if not with_torch:
+            raise ValueError('Can not import torch')
+        
+        return torch.sum(X**2, dim=1)

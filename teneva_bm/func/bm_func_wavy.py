@@ -2,6 +2,13 @@ import numpy as np
 from teneva_bm.func.func import Func
 
 
+try:
+    import torch
+    with_torch = True
+except Exception as e:
+    with_torch = False
+
+
 class BmFuncWavy(Func):
     def __init__(self, d=7, n=16, seed=42, name=None):
         super().__init__(d, n, seed, name)
@@ -55,3 +62,11 @@ class BmFuncWavy(Func):
     def target_batch(self, X):
         Y = np.cos(self.opt_k * X) * np.exp(-X**2 / 2)
         return 1. - np.sum(Y, axis=1) / self.d
+
+    def target_batch_pt(self, X):
+        if not with_torch:
+            raise ValueError('Can not import torch')
+        
+        Y = torch.cos(self.opt_k * X) * torch.exp(-X**2 / 2)
+        
+        return 1. - torch.sum(Y, dim=1) / self.d

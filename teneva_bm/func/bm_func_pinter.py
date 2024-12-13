@@ -2,6 +2,13 @@ import numpy as np
 from teneva_bm.func.func import Func
 
 
+try:
+    import torch
+    with_torch = True
+except Exception as e:
+    with_torch = False
+
+
 class BmFuncPinter(Func):
     def __init__(self, d=7, n=16, seed=42, name=None):
         super().__init__(d, n, seed, name)
@@ -42,5 +49,25 @@ class BmFuncPinter(Func):
         y1 = np.sum(i * X**2, axis=1)
         y2 = np.sum(20 * i * np.sin(A)**2, axis=1)
         y3 = np.sum(i * np.log10(1. + i * B**2), axis=1)
+
+        return y1 + y2 + y3
+
+    def target_batch_pt(self, X):
+        if not with_torch:
+            raise ValueError('Can not import torch')
+        
+        device = X.device
+
+        Xm1 = torch.hstack([X[:, -1].reshape(-1, 1), X[:, :-1]])
+        Xp1 = torch.hstack([X[:, +1:], X[:, +0].reshape(-1, 1)])
+
+        A = Xm1 * torch.sin(X) + torch.sin(Xp1)
+        B = Xm1**2 - 2. * X + 3. * Xp1 - torch.cos(X) + 1.
+
+        i = torch.arange(1, self.d+1, device=device)
+
+        y1 = torch.sum(i * X**2, dim=1)
+        y2 = torch.sum(20 * i * torch.sin(A)**2, dim=1)
+        y3 = torch.sum(i * torch.log10(1. + i * B**2), dim=1)
 
         return y1 + y2 + y3

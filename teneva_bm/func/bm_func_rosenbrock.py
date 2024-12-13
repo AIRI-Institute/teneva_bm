@@ -2,6 +2,13 @@ import numpy as np
 from teneva_bm.func.func import Func
 
 
+try:
+    import torch
+    with_torch = True
+except Exception as e:
+    with_torch = False
+
+
 class BmFuncRosenbrock(Func):
     def __init__(self, d=7, n=16, seed=42, name=None):
         super().__init__(d, n, seed, name)
@@ -65,8 +72,12 @@ class BmFuncRosenbrock(Func):
         Y2 = (X[:, :-1] - 1.)**2
         return np.sum(Y1 + Y2, axis=1)
 
-    def _target_pt(self, x):
-        """Draft."""
-        y1 = 100. * (x[1:] - x[:-1]**2)**2
-        y2 = (x[:-1] - 1.)**2
-        return torch.sum(y1 + y2)
+    def target_batch_pt(self, X):
+        if not with_torch:
+            raise ValueError('Can not import torch')
+
+        y1 = 100. * (X[:, 1:] - X[:, :-1]**2)**2
+        
+        y2 = (X[:, :-1] - 1.)**2
+        
+        return torch.sum(y1 + y2, dim=1)

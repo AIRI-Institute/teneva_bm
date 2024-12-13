@@ -2,6 +2,13 @@ import numpy as np
 from teneva_bm.func.func import Func
 
 
+try:
+    import torch
+    with_torch = True
+except Exception as e:
+    with_torch = False
+
+
 class BmFuncMichalewicz(Func):
     def __init__(self, d=7, n=16, seed=42, name=None):
         super().__init__(d, n, seed, name)
@@ -50,15 +57,20 @@ class BmFuncMichalewicz(Func):
         return Y
 
     def target_batch(self, X):
-        y1 = np.sin(np.arange(1, self.d+1) * X**2 / np.pi)
+        i = np.arange(1, self.d+1)
+        y1 = np.sin(i * X**2 / np.pi)
         y = -np.sum(np.sin(X) * y1**(2 * self.opt_M), axis=1)
         return y
 
-    def _target_pt(self, x):
-        """Draft."""
-        d = torch.tensor(self.d)
-        opt_M = torch.tensor(self.opt_M)
-        pi = torch.tensor(np.pi)
-        y1 = torch.sin(((torch.arange(d) + 1) * x**2 / pi))
-        y = -torch.sum(torch.sin(x) * y1**(2 * opt_M))
+    def target_batch_pt(self, X):
+        if not with_torch:
+            raise ValueError('Can not import torch')
+        
+        device = X.device
+
+        i = torch.arange(1, self.d+1, device=device)
+        y1 = torch.sin(((i) * X**2 / np.pi))
+        
+        y = -torch.sum(torch.sin(X) * y1**(2 * self.opt_M), dim=1)
+        
         return y

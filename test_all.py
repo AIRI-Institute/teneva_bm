@@ -10,6 +10,13 @@ from teneva_bm import *
 import unittest
 
 
+try:
+    import torch
+    with_torch = True
+except Exception as e:
+    with_torch = False
+
+
 class TestArgs(unittest.TestCase):
     def test_base(self):
         d = 12
@@ -504,6 +511,26 @@ class TestShow(unittest.TestCase):
 
                 msg = f'\n>>> Test failed for "{Bm.__name__}"'
                 self.assertTrue(is_ok, msg)
+
+
+class TestTorch(unittest.TestCase):
+    def test_base(self):
+        if not with_torch:
+            msg = 'Warning: can not run test TestTorch. Torch is not installed'
+            print(msg)
+            return
+
+        for Bm in teneva_bm_get(d=10, with_pt=True):
+            bm = Bm(d=7, n=16)
+            bm.prep()
+
+            x = bm.a + np.random.rand(bm.d) * (bm.b - bm.a)
+
+            y_np = bm.get_poi(x)
+            y_pt = bm.target_batch_pt(torch.from_numpy(x.reshape(1, -1)))[0]
+            e = abs(y_np - y_pt) / abs(y_np)
+
+            self.assertTrue(e <= 1.E-6)
 
 
 if __name__ == '__main__':

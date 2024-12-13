@@ -2,6 +2,13 @@ import numpy as np
 from teneva_bm.func.func import Func
 
 
+try:
+    import torch
+    with_torch = True
+except Exception as e:
+    with_torch = False
+
+
 class BmFuncDixon(Func):
     def __init__(self, d=7, n=16, seed=42, name=None):
         super().__init__(d, n, seed, name)
@@ -35,25 +42,6 @@ class BmFuncDixon(Func):
     @property
     def ref(self):
         return self.ref_i, 383674.42504801514
-
-    def target_batch(self, X):
-        y1 = (X[:, 0] - 1)**2
-
-        y2 = np.arange(2, self.d+1) * (2. * X[:, 1:]**2 - X[:, :-1])**2
-        y2 = np.sum(y2, axis=1)
-
-        return y1 + y2
-
-    def _target_pt(self, x):
-        """Draft."""
-        d = torch.tensor(self.d)
-
-        y1 = (x[0] - 1)**2
-
-        y2 = torch.arange(2, d+1) * (2. * x[1:]**2 - x[:-1])**2
-        y2 = torch.sum(y2)
-
-        return y1 + y2
 
     @property
     def with_cores(self):
@@ -90,3 +78,26 @@ class BmFuncDixon(Func):
 
         return [_core(x, i+1, 'l' if i == self.d-1 else 'm')
             for i, x in enumerate(X.T)]
+
+    def target_batch(self, X):
+        y1 = (X[:, 0] - 1)**2
+
+        i = np.arange(2, self.d+1)
+        y2 = i * (2. * X[:, 1:]**2 - X[:, :-1])**2
+        y2 = np.sum(y2, axis=1)
+
+        return y1 + y2
+
+    def target_batch_pt(self, X):
+        if not with_torch:
+            raise ValueError('Can not import torch')
+        
+        device = X.device
+
+        y1 = (X[:, 0] - 1)**2
+
+        i = torch.arange(2, self.d+1, device=device)
+        y2 = i * (2. * X[:, 1:]**2 - X[:, :-1])**2
+        y2 = torch.sum(y2, dim=1)
+
+        return y1 + y2

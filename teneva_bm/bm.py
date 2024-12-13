@@ -5,6 +5,17 @@ from teneva_bm import __version__
 from time import perf_counter as tpc
 
 
+import warnings
+warnings.filterwarnings('ignore', category=DeprecationWarning) 
+
+
+try:
+    import torch
+    with_torch = True
+except Exception as e:
+    with_torch = False
+
+
 class Bm:
     def __init__(self, d=None, n=None, seed=42, name=None):
         self.is_prep = False
@@ -466,6 +477,11 @@ class Bm:
         return False
 
     @property
+    def with_pt(self):
+        """Return True if benchmark has pytorch version."""
+        return False
+
+    @property
     def with_render(self):
         """Return True if benchmark supports "render" method."""
         return False
@@ -718,6 +734,21 @@ class Bm:
                 return self.process_last()
 
         return self.process(I, X, y, ind_new, t, is_batch, skip_process)
+
+    def get_grad_poi(self, x):
+        """Experimental function to compute grad with pytorch."""
+        if not with_torch:
+            raise ValueError('Can not import torch')
+        
+        assert len(x.shape) == 1 and len(x) == self.d
+
+        self.m += 1
+
+        x = torch.from_numpy(x)
+        x = x.clone().detach().requires_grad_(True)
+        y = self.target_batch_pt(x.reshape(1, -1))[0]
+        y.backward()
+        return x.grad.detach().cpu().numpy()
 
     def get_solution(self, i=None, best=True):
         """Return the solution for given i or current solution or the best."""

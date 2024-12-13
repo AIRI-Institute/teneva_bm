@@ -2,6 +2,13 @@ import numpy as np
 from teneva_bm.func.func import Func
 
 
+try:
+    import torch
+    with_torch = True
+except Exception as e:
+    with_torch = False
+
+
 class BmFuncRastrigin(Func):
     def __init__(self, d=7, n=16, seed=42, name=None):
         super().__init__(d, n, seed, name)
@@ -54,13 +61,16 @@ class BmFuncRastrigin(Func):
         y2 = np.sum(X**2 - self.opt_A * np.cos(2. * np.pi * X), axis=1)
         return y1 + y2
 
-    def _target_pt(self, x):
-        """Draft."""
-        d = torch.tensor(self.d)
-        opt_A = torch.tensor(self.opt_A)
-        pi = torch.tensor(np.pi)
+    def target_batch_pt(self, X):
+        if not with_torch:
+            raise ValueError('Can not import torch')
 
-        y1 = opt_A * d
-        y2 = torch.sum(x**2 - opt_A * torch.cos(2. * pi * x))
+        #device = X.device
+
+        #opt_A = torch.tensor(self.opt_A, device=device)
+        #pi = torch.tensor(np.pi, device=device)
+
+        y1 = self.opt_A * self.d
+        y2 = torch.sum(X**2 - self.opt_A * torch.cos(2. * np.pi * X), dim=1)
 
         return y1 + y2

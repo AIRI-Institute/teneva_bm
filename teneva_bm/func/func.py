@@ -24,6 +24,10 @@ class Func(Bm):
     def with_plot(self):
         return self.d == 2
 
+    @property
+    def with_pt(self):
+        return True
+
     def plot(self, fpath=None):
         if self.d != 2:
             raise ValueError('Plot is supported only for 2D case')

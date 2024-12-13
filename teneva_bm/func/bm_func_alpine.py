@@ -2,6 +2,13 @@ import numpy as np
 from teneva_bm.func.func import Func
 
 
+try:
+    import torch
+    with_torch = True
+except Exception as e:
+    with_torch = False
+
+
 class BmFuncAlpine(Func):
     def __init__(self, d=7, n=16, seed=42, name=None):
         super().__init__(d, n, seed, name)
@@ -40,6 +47,8 @@ class BmFuncAlpine(Func):
     def target_batch(self, X):
         return np.sum(np.abs(X * np.sin(X) + 0.1 * X), axis=1)
 
-    def _target_pt(self, x):
-        """Draft."""
-        return torch.sum(torch.abs(x * torch.sin(x) + 0.1 * x))
+    def target_batch_pt(self, X):
+        if not with_torch:
+            raise ValueError('Can not import torch')
+        
+        return torch.sum(torch.abs(X * torch.sin(X) + 0.1 * X), dim=1)

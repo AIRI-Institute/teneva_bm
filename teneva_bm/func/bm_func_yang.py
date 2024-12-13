@@ -2,6 +2,13 @@ import numpy as np
 from teneva_bm.func.func import Func
 
 
+try:
+    import torch
+    with_torch = True
+except Exception as e:
+    with_torch = False
+
+
 class BmFuncYang(Func):
     def __init__(self, d=7, n=16, seed=42, name=None):
         super().__init__(d, n, seed, name)
@@ -37,7 +44,6 @@ class BmFuncYang(Func):
                 G[:, i, :] *= np.exp(-np.sin(x_cur**2))
         return Y
 
-
     @property
     def ref(self):
         return self.ref_i, 85.15511376128357
@@ -45,4 +51,14 @@ class BmFuncYang(Func):
     def target_batch(self, X):
         y1 = np.sum(np.abs(X), axis=1)
         y2 = np.exp(-np.sum(np.sin(X**2), axis=1))
+        return y1 * y2
+
+    def target_batch_pt(self, X):
+        if not with_torch:
+            raise ValueError('Can not import torch')
+        
+        y1 = torch.sum(torch.abs(X), dim=1)
+        
+        y2 = torch.exp(-torch.sum(torch.sin(X**2), dim=1))
+        
         return y1 * y2

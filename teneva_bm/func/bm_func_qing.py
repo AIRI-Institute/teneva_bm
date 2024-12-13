@@ -2,6 +2,13 @@ import numpy as np
 from teneva_bm.func.func import Func
 
 
+try:
+    import torch
+    with_torch = True
+except Exception as e:
+    with_torch = False
+
+
 class BmFuncQing(Func):
     def __init__(self, d=7, n=16, seed=42, name=None):
         super().__init__(d, n, seed, name)
@@ -43,8 +50,12 @@ class BmFuncQing(Func):
         i = np.arange(1, self.d+1)
         return np.sum((X**2 - i)**2, axis=1)
 
-    def _target_pt(self, x):
-        """Draft."""
-        d = torch.tensor(self.d)
-        i = torch.arange(1, d+1)
-        return torch.sum((x**2 - i)**2)
+    def target_batch_pt(self, X):
+        if not with_torch:
+            raise ValueError('Can not import torch')
+        
+        device = X.device
+        
+        i = torch.arange(1, self.d+1)
+
+        return torch.sum((X**2 - i)**2, dim=1)

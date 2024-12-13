@@ -2,6 +2,13 @@ import numpy as np
 from teneva_bm.func.func import Func
 
 
+try:
+    import torch
+    with_torch = True
+except Exception as e:
+    with_torch = False
+
+
 class BmFuncSchaffer(Func):
     def __init__(self, d=7, n=16, seed=42, name=None):
         super().__init__(d, n, seed, name)
@@ -39,8 +46,10 @@ class BmFuncSchaffer(Func):
         Y = 0.5 + (np.sin(np.sqrt(Z))**2 - 0.5) / (1. + 0.001 * Z)**2
         return np.sum(Y, axis=1)
 
-    def _target_pt(self, x):
-        """Draft."""
-        z = x[:-1]**2 + x[1:]**2
-        y = 0.5 + (torch.sin(torch.sqrt(z))**2 - 0.5) / (1. + 0.001 * z)**2
-        return torch.sum(y)
+    def target_batch_pt(self, X):
+        if not with_torch:
+            raise ValueError('Can not import torch')
+
+        Z = X[:, :-1]**2 + X[:, 1:]**2
+        y = 0.5 + (torch.sin(torch.sqrt(Z))**2 - 0.5) / (1. + 0.001 * Z)**2
+        return torch.sum(y, dim=1)
