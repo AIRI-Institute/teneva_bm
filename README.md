@@ -10,7 +10,7 @@ Benchmarks library, based on the software product [teneva](https://github.com/An
 
 1. The package can be installed via pip (it requires the [Python](https://www.python.org) programming language of the version >= 3.10):
     ```bash
-    pip install teneva_bm==0.9.0
+    pip install teneva_bm==0.9.1
     ```
     > The package can be also downloaded from the repository [teneva_bm](https://github.com/AIRI-Institute/teneva_bm) and be installed by `python setup.py install` command from the root folder of the project.
 
